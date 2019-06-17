@@ -184,6 +184,7 @@ export function registerResource(res: Resource, t: string, name: string, custom:
         req.setAcceptsecrets(true);
         req.setAdditionalsecretoutputsList((<any>opts).additionalSecretOutputs || []);
         req.setAliasesList(resop.aliases);
+        req.setCustomtimeouts(opts.customTimeouts);
 
         const propertyDependencies = req.getPropertydependenciesMap();
         for (const [key, resourceURNs] of resop.propertyToDirectDependencyURNs) {
