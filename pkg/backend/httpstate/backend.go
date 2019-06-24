@@ -354,6 +354,42 @@ func (b *cloudBackend) CurrentUser() (string, error) {
 
 func (b *cloudBackend) CloudURL() string { return b.url }
 
+func (b *cloudBackend) ParsePolicyPackReference(s string) (backend.PolicyPackReference, error) {
+	split := strings.Split(s, "/")
+	var orgName string
+	var policyPackName string
+
+	switch len(split) {
+	case 2:
+		orgName = split[0]
+		policyPackName = split[1]
+	default:
+		return nil, errors.Errorf("could not parse policy pack name '%s'; must be of the form "+
+			"<orgName>/<policyPackName>", s)
+	}
+
+	return newCloudBackendPolicyPackReference(orgName, tokens.QName(policyPackName)), nil
+}
+
+func (b *cloudBackend) GetPolicyPack(ctx context.Context, policyPackRef backend.PolicyPackReference,
+	d diag.Sink) (backend.PolicyPack, error) {
+
+	//
+	// TODO: Check if the policy pack exists before creating it.
+	//
+
+	apiToken, err := workspace.GetAccessToken(b.CloudURL())
+	if err != nil {
+		return nil, err
+	}
+
+	return &cloudPolicyPack{
+		ref: newCloudBackendPolicyPackReference(
+			policyPackRef.OrgName(), tokens.QName(policyPackRef.Name())),
+		b:  b,
+		cl: client.NewClient(b.CloudURL(), apiToken, d)}, nil
+}
+
 func (b *cloudBackend) ParseStackReference(s string) (backend.StackReference, error) {
 	split := strings.Split(s, "/")
 	var owner string
