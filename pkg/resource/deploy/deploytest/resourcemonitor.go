@@ -31,7 +31,7 @@ func (rm *ResourceMonitor) RegisterResource(t tokens.Type, name string, custom b
 	dependencies []resource.URN, provider string, inputs resource.PropertyMap,
 	propertyDeps map[resource.PropertyKey][]resource.URN, deleteBeforeReplace bool,
 	version string, ignoreChanges []string,
-	aliases []resource.URN) (resource.URN, resource.ID, resource.PropertyMap, error) {
+	aliases []resource.URN, customTimeouts *resource.CustomTimeouts) (resource.URN, resource.ID, resource.PropertyMap, error) {
 
 	// marshal inputs
 	ins, err := plugin.MarshalProperties(inputs, plugin.MarshalOptions{KeepUnknowns: true})
@@ -62,6 +62,13 @@ func (rm *ResourceMonitor) RegisterResource(t tokens.Type, name string, custom b
 		}
 	}
 
+	var timeouts pulumirpc.RegisterResourceRequest_CustomTimeouts
+	if customTimeouts != nil {
+		timeouts.Create = customTimeouts.Create
+		timeouts.Update = customTimeouts.Update
+		timeouts.Delete = customTimeouts.Delete
+	}
+
 	// submit request
 	resp, err := rm.resmon.RegisterResource(context.Background(), &pulumirpc.RegisterResourceRequest{
 		Type:                 string(t),
@@ -77,6 +84,7 @@ func (rm *ResourceMonitor) RegisterResource(t tokens.Type, name string, custom b
 		IgnoreChanges:        ignoreChanges,
 		Version:              version,
 		Aliases:              aliasStrings,
+		CustomTimeouts:		  &timeouts,
 	})
 	if err != nil {
 		return "", "", nil, err
