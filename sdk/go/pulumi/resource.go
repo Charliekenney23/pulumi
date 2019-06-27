@@ -62,10 +62,18 @@ type ResourceOpt struct {
 	Provider ProviderResource
 	// DeleteBeforeReplace, when set to true, ensures that this resource is deleted prior to replacement.
 	DeleteBeforeReplace bool
+	// CustomTimeouts is an optional configuration block used for CRUD operations
+	CustomTimeouts *CustomTimeouts
 }
 
 // InvokeOpt contains optional settings that control an invoke's behavior.
 type InvokeOpt struct {
 	// Provider is an optional provider resource to use for this invoke.
 	Provider ProviderResource
+}
+
+type CustomTimeouts struct {
+	Create float32
+	Update float32
+	Delete float32
 }
